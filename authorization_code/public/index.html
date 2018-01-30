@@ -1,0 +1,143 @@
+<!doctype html>
+<html>
+  <head>
+    <title>now-playing</title>
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+    <style type="text/css">
+      #login, #loggedin {
+        display: none;
+      }
+      .text-overflow {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        width: 500px;
+      }
+    </style>
+  </head>
+
+  <body>
+      <br><br><br>
+    <div class="container">
+      <div style="align: center" id="login">
+        <a href="/login" class="btn btn-primary"><h1>Log in with Spotify</h1></a>
+      </div>
+      <div id="loggedin">
+        <div id="user-profile">
+        </div>
+      </div>
+    </div>
+
+    <script id="user-profile-template" type="text/x-handlebars-template">
+      <h1>Logged in as {{display_name}}</h1>
+      <div class="media">
+        <div class="pull-left">
+          <img class="media-object" width="150" src="{{images.0.url}}" />
+        </div>
+        <div class="media-body">
+          <dl class="dl-horizontal">
+            <dt>Display name</dt><dd class="clearfix">{{display_name}}</dd>
+            <dt>Username</dt><dd>{{id}}</dd>
+          </dl>
+        </div>
+      </div>
+      <div>
+          <h2>You can close this tab! Make sure this directory is in your PATH and you should be all set.</h2>
+          <p>Here are the commands that you can use:
+              <dl class="dl-horizontal">
+                  <dt><code>spotify</code></dt><dd>prints the currently playing song.</dd>
+                  <dt><code>spotify next</code></dt><dd>skips to the next song in the queue.</dd>
+                  <dt><code>spotify prev</code></dt><dd>seeks to the previous song in the queue.</dd>
+                  <dt><code>spotify pause</code></dt><dd>pauses the currently playing song.</dd>
+                  <dt><code>spotify play </code></dt><dd>resumes the currently playing song.</dd>
+              </dl>
+          </p>
+          <p> You could even add this to your <code>PS1</code>! For example: </p>
+          <p> <code>export PS1=\$(spotify)\n</code></p>
+      </div>
+    </script>
+
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0-alpha.1/handlebars.min.js"></script>
+    <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+    <script>
+      (function() {
+
+        /**
+         * Obtains parameters from the hash of the URL
+         * @return Object
+         */
+        function getHashParams() {
+          var hashParams = {};
+          var e, r = /([^&;=]+)=?([^&;]*)/g,
+              q = window.location.hash.substring(1);
+          while ( e = r.exec(q)) {
+             hashParams[e[1]] = decodeURIComponent(e[2]);
+          }
+          return hashParams;
+        }
+
+        var userProfileSource = document.getElementById('user-profile-template').innerHTML,
+            userProfileTemplate = Handlebars.compile(userProfileSource),
+            userProfilePlaceholder = document.getElementById('user-profile');
+
+        var params = getHashParams();
+
+        var access_token = params.access_token,
+            refresh_token = params.refresh_token,
+            error = params.error;
+
+        if (error) {
+          alert('There was an error during the authentication');
+        } else {
+              if (access_token) {
+                $.ajax({
+                    url: 'https://api.spotify.com/v1/me',
+                    headers: {
+                      'Authorization': 'Bearer ' + access_token
+                    },
+                    success: function(response) {
+                      userProfilePlaceholder.innerHTML = userProfileTemplate(response);
+
+                      $('#login').hide();
+                      $('#loggedin').show();
+                    }
+                });
+
+                $.ajax({
+                    url: 'https://api.spotify.com/v1/me/player/currently-playing',
+                    headers: {
+                      'Authorization': 'Bearer ' + access_token
+                    },
+                    success: function(response) {
+                        var progress = Math.floor(response.progress_ms/1000);
+                        var seconds = progress%60;
+                        var time = (Math.floor(progress/60)).toString() + ":";
+                        if (seconds < 10) { time += "0"; }
+                        time += seconds;
+
+                        var totaltime = Math.floor(response.item.duration_ms/1000);
+                        var totalseconds = progress%60;
+                        var totaltimestamp = (Math.floor(totaltime/60)).toString() + ":";
+                        if (totalseconds < 10) { totaltimestamp += "0"; }
+                        totaltimestamp += totalseconds;
+
+                        nowPlayingPlaceholder.innerHTML = nowPlayingTemplate({
+                            artist: response.item.artists[0].name,
+                            songname: response.item.name,
+                            timestamp: time,
+                            totaltime: totaltimestamp,
+                            playing: response.is_playing ? "playing" : "paused"
+                        });
+                    }
+                })
+              } else {
+                  // render initial screen
+                  $('#login').show();
+                  $('#loggedin').hide();
+              }
+          }
+      })();
+    </script>
+  </body>
+</html>

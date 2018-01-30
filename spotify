@@ -1,0 +1,59 @@
+#!/bin/bash
+# spotify.sh
+
+convertsecs() {
+    ((h=${1}/3600))
+    ((m=(${1}%3600)/60))
+    ((s=${1}%60))
+    printf "%02d:%02d\n" $m $s
+    #printf "%02d:%02d:%02d\n" $h $m $s
+}
+
+ACCESS_TOKEN=$(curl -s -i -H "Accept: application/json" http://localhost:8888/refresh_token)
+
+ACCESS_TOKEN=${ACCESS_TOKEN##*:}
+ACCESS_TOKEN=${ACCESS_TOKEN#\"}
+ACCESS_TOKEN=${ACCESS_TOKEN%\"*}
+
+if [[ $1 = "next" ]]; then
+    echo "skipping track..."
+    curl -X POST "https://api.spotify.com/v1/me/player/next" -H "Authorization: Bearer $ACCESS_TOKEN"
+elif [[ $1 = "prev" ]]; then
+    echo "seeking track..."
+    curl -X POST "https://api.spotify.com/v1/me/player/previous" -H "Authorization: Bearer $ACCESS_TOKEN"
+elif [[ $1 = "pause" ]]; then
+    echo "pausing track..."
+    curl -X PUT "https://api.spotify.com/v1/me/player/pause" -H "Authorization: Bearer $ACCESS_TOKEN"
+elif [[ $1 = "play" ]]; then
+    echo "playing track..."
+    curl -X PUT "https://api.spotify.com/v1/me/player/play" -H "Authorization: Bearer $ACCESS_TOKEN"
+else
+    curl -s -H "Accept: application/json" http://localhost:8888/refresh_playback?access_token=$ACCESS_TOKEN > ~/spotifydata.json
+
+    ISPLAYING=$(cat ~/spotifydata.json | jq '.is_playing')
+    if [ "$ISPLAYING" = "true" ]; then
+        PLAYSTATUS='►'
+    else
+        PLAYSTATUS='┃┃'
+    fi
+
+    PROGRESS=$(cat ~/spotifydata.json | jq '.progress_ms')
+    if [[ $PROGRESS != "" ]]; then
+        let "PROGRESS = $PROGRESS / 1000"
+        TIMESTAMP=$(convertsecs $PROGRESS)
+
+        TOTALTIME=$(cat ~/spotifydata.json | jq '.item.duration_ms')
+        let "TOTALTIME = $TOTALTIME / 1000"
+        TOTALTIMESTAMP=$(convertsecs $TOTALTIME)
+
+        NAME=$(cat ~/spotifydata.json | jq '.item.name' -r )
+
+        ARTIST=$(cat ~/spotifydata.json | jq '.item.artists[0].name' -r)
+
+        ALBUM=$(cat ~/spotifydata.json | jq '.item.album.name' -r)
+
+        echo "$PLAYSTATUS [$TIMESTAMP/$TOTALTIMESTAMP] $ARTIST - $NAME ($ALBUM)"
+    else
+        echo "Spotify is not running at the moment."
+    fi
+fi

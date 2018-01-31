@@ -27,33 +27,32 @@ elif [[ $1 = "pause" ]]; then
 elif [[ $1 = "play" ]]; then
     echo "playing track..."
     curl -X PUT "https://api.spotify.com/v1/me/player/play" -H "Authorization: Bearer $ACCESS_TOKEN"
-else
+fi
     curl -s -H "Accept: application/json" http://localhost:8888/refresh_playback?access_token=$ACCESS_TOKEN > ~/spotifydata.json
 
-    ISPLAYING=$(cat ~/spotifydata.json | jq '.is_playing')
-    if [ "$ISPLAYING" = "true" ]; then
-        PLAYSTATUS='►'
-    else
-        PLAYSTATUS='┃┃'
-    fi
+ISPLAYING=$(cat ~/spotifydata.json | jq '.is_playing')
+if [ "$ISPLAYING" = "true" ]; then
+    PLAYSTATUS='►'
+else
+    PLAYSTATUS='┃┃'
+fi
 
-    PROGRESS=$(cat ~/spotifydata.json | jq '.progress_ms')
-    if [[ $PROGRESS != "" ]]; then
-        let "PROGRESS = $PROGRESS / 1000"
-        TIMESTAMP=$(convertsecs $PROGRESS)
+PROGRESS=$(cat ~/spotifydata.json | jq '.progress_ms')
+if [[ $PROGRESS != "" ]]; then
+    let "PROGRESS = $PROGRESS / 1000"
+    TIMESTAMP=$(convertsecs $PROGRESS)
 
-        TOTALTIME=$(cat ~/spotifydata.json | jq '.item.duration_ms')
-        let "TOTALTIME = $TOTALTIME / 1000"
-        TOTALTIMESTAMP=$(convertsecs $TOTALTIME)
+    TOTALTIME=$(cat ~/spotifydata.json | jq '.item.duration_ms')
+    let "TOTALTIME = $TOTALTIME / 1000"
+    TOTALTIMESTAMP=$(convertsecs $TOTALTIME)
 
-        NAME=$(cat ~/spotifydata.json | jq '.item.name' -r )
+    NAME=$(cat ~/spotifydata.json | jq '.item.name' -r )
 
-        ARTIST=$(cat ~/spotifydata.json | jq '.item.artists[0].name' -r)
+    ARTIST=$(cat ~/spotifydata.json | jq '.item.artists[0].name' -r)
 
-        ALBUM=$(cat ~/spotifydata.json | jq '.item.album.name' -r)
+    ALBUM=$(cat ~/spotifydata.json | jq '.item.album.name' -r)
 
-        echo "$PLAYSTATUS [$TIMESTAMP/$TOTALTIMESTAMP] $ARTIST - $NAME ($ALBUM)"
-    else
-        echo "Spotify is not running at the moment."
-    fi
+    echo "$PLAYSTATUS [$TIMESTAMP/$TOTALTIMESTAMP] $ARTIST - $NAME ($ALBUM)"
+else
+    echo "Spotify is not running at the moment."
 fi

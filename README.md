@@ -1,6 +1,6 @@
 # now-playing
 
-This is a simple expressjs app that allows you to control spotify playback from the command line.
+This is a simple [Express](https://expressjs.com) app that allows you to control spotify playback from the command line. Feel free to modify it however you want!
 
 ## Setup:
 
@@ -11,7 +11,7 @@ This is a simple expressjs app that allows you to control spotify playback from 
 5. Navigate to localhost:8888 in your web browser, and authorize the app's access to your account.
 6. If you see the success page, you should be good to go! **NOTE: Leave the server running in order for the app to function.**
 
-These are the available commands:
+## These are the available commands:
 
 * `spotify` will echo the currently playing song.
 * `spotify next` and `spotify prev` will skip one song forward and backward in the queue, respectively.

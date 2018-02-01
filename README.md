@@ -2,6 +2,13 @@
 
 This is a simple [Express](https://expressjs.com) app that allows you to control spotify playback from the command line. Feel free to modify it however you want!
 
+## Prerequisites:
+
+* [jq](https://stedolan.github.io/jq/)
+* [npm](https://www.npmjs.com/)
+* [node](https://nodejs.org/en/)
+
+
 ## Setup:
 
 1. Clone this repository.

@@ -9,7 +9,7 @@ convertsecs() {
     #printf "%02d:%02d:%02d\n" $h $m $s
 }
 
-ACCESS_TOKEN=$(curl -s -i -H "Accept: application/json" http://localhost:8888/refresh_token)
+ACCESS_TOKEN=$(curl -s -i -H "Accept: application/json" http://localhost:6290/refresh_token)
 
 ACCESS_TOKEN=${ACCESS_TOKEN##*:}
 ACCESS_TOKEN=${ACCESS_TOKEN#\"}
@@ -28,7 +28,7 @@ elif [[ $1 = "play" ]]; then
     echo "playing track..."
     curl -X PUT "https://api.spotify.com/v1/me/player/play" -H "Authorization: Bearer $ACCESS_TOKEN"
 fi
-    curl -s -H "Accept: application/json" http://localhost:8888/refresh_playback?access_token=$ACCESS_TOKEN > ~/spotifydata.json
+    curl -s -H "Accept: application/json" http://localhost:6290/refresh_playback?access_token=$ACCESS_TOKEN > ~/spotifydata.json
 
 ISPLAYING=$(cat ~/spotifydata.json | jq '.is_playing')
 if [ "$ISPLAYING" = "true" ]; then

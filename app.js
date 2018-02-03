@@ -9,7 +9,7 @@ var cookieParser = require('cookie-parser');
 
 var client_id = '314a5ae76b33427dadc7a938cb6c5219'; // Your client id
 var client_secret = '947c07d41022480b9137bf52d9953683'; // Your secret
-var redirect_uri = 'http://localhost:8888/callback'; // Your redirect uri
+var redirect_uri = 'http://localhost:6290/callback'; // Your redirect uri
 
 /**
  * Generates a random string containing numbers and letters
@@ -175,5 +175,5 @@ app.get('/refresh_playback', function(req, res)
 })
 
 
-console.log('Listening on 8888');
-app.listen(8888);
+console.log('Listening on 6290');
+app.listen(6290);

@@ -16,16 +16,16 @@ ACCESS_TOKEN=${ACCESS_TOKEN#\"}
 ACCESS_TOKEN=${ACCESS_TOKEN%\"*}
 
 if [[ $1 = "next" ]]; then
-    echo "skipping track..."
+    printf "\t\033[1;32mskipping track...\033[0m\n"
     curl -X POST "https://api.spotify.com/v1/me/player/next" -H "Authorization: Bearer $ACCESS_TOKEN"
 elif [[ $1 = "prev" ]]; then
-    echo "seeking track..."
+    printf "\t\033[1;32mseeking track...\033[0m\n"
     curl -X POST "https://api.spotify.com/v1/me/player/previous" -H "Authorization: Bearer $ACCESS_TOKEN"
 elif [[ $1 = "pause" ]]; then
-    echo "pausing track..."
+    printf "\t\033[1;32mpausing track...\033[0m\n"
     curl -X PUT "https://api.spotify.com/v1/me/player/pause" -H "Authorization: Bearer $ACCESS_TOKEN"
 elif [[ $1 = "play" ]]; then
-    echo "playing track..."
+    printf "\t\033[1;32mplaying track...\033[0m\n"
     curl -X PUT "https://api.spotify.com/v1/me/player/play" -H "Authorization: Bearer $ACCESS_TOKEN"
 fi
     curl -s -H "Accept: application/json" http://localhost:6290/refresh_playback?access_token=$ACCESS_TOKEN > ~/spotifydata.json
@@ -52,7 +52,7 @@ if [[ $PROGRESS != "" ]]; then
 
     ALBUM=$(cat ~/spotifydata.json | jq '.item.album.name' -r)
 
-    echo "$PLAYSTATUS [$TIMESTAMP/$TOTALTIMESTAMP] $ARTIST - $NAME ($ALBUM)"
+    printf "\t\033[1;32m$PLAYSTATUS [$TIMESTAMP/$TOTALTIMESTAMP] $ARTIST - $NAME ($ALBUM)\033[0m\n"
 else
-    echo "Spotify is not running at the moment."
+    printf "\t\033[1;32mSpotify is not running at the moment.\033[0m\n"
 fi
